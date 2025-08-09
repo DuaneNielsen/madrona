@@ -148,7 +148,7 @@ static ImGuiRenderState imguiInit(GLFWwindow *window, const Device &dev,
         scale_factor = x_scale;
     }
 
-    float scaled_font_size = 16.f * scale_factor;
+    float scaled_font_size = 24.f * scale_factor;
     io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), scaled_font_size);
 
     auto &style = ImGui::GetStyle();

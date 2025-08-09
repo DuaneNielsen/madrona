@@ -4,18 +4,15 @@ from functools import partial
 
 import jax
 from jax import numpy as jnp
-from jax import core, dtypes
+from jax import core
 from jax.core import ShapedArray
 from jax.lib import xla_client
 from jax.interpreters import xla
 from jax.interpreters import mlir
 from jax.interpreters.mlir import ir, dtype_to_ir_type
 from jaxlib.hlo_helpers import custom_call
-import builtins as __builtins__
 import numpy as np
 
-from jax._src import effects
-from jax._src.lib.mlir.dialects import hlo
 
 custom_call_prefix = f"{type(sim_obj).__name__}_{id(sim_obj)}"
 init_custom_call_name = f"{custom_call_prefix}_init"

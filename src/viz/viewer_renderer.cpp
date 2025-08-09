@@ -3453,9 +3453,29 @@ bool ViewerRendererState::renderGUIAndPresent(
         void *pixels = screenshotBuffer.ptr;
 
         std::string dst_file = ss_path;
-        int ret = stbi_write_bmp(
-            dst_file.c_str(), frame.fb.colorAttachment.width,
-            frame.fb.colorAttachment.height, 4, pixels);
+        
+        // Check if file ends with .bmp, otherwise use PNG
+        bool use_bmp = false;
+        size_t ext_pos = dst_file.rfind('.');
+        if (ext_pos != std::string::npos) {
+            std::string ext = dst_file.substr(ext_pos);
+            if (ext == ".bmp" || ext == ".BMP") {
+                use_bmp = true;
+            }
+        }
+        
+        int ret;
+        if (use_bmp) {
+            ret = stbi_write_bmp(
+                dst_file.c_str(), frame.fb.colorAttachment.width,
+                frame.fb.colorAttachment.height, 4, pixels);
+        } else {
+            // Default to PNG - last parameter is stride (0 = packed)
+            ret = stbi_write_png(
+                dst_file.c_str(), frame.fb.colorAttachment.width,
+                frame.fb.colorAttachment.height, 4, pixels,
+                frame.fb.colorAttachment.width * 4);
+        }
 
         if (ret) {
             printf("Wrote %s\n", dst_file.c_str());

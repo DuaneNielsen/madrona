@@ -41,6 +41,7 @@ struct Viewer::Impl {
     int32_t simTickRate;
     float cameraMoveSpeed;
     bool shouldExit;
+    bool hideMenu;
 
     inline Impl(const render::RenderManager &render_mgr,
                 const Window *window,
@@ -545,15 +546,19 @@ Viewer::Impl::Impl(
           render_mgr.renderContext().engine_interop_.maxViewsPerWorld),
       simTickRate(cfg.simTickRate),
       cameraMoveSpeed(cfg.cameraMoveSpeed),
-      shouldExit(false)
+      shouldExit(false),
+      hideMenu(cfg.hideMenu)
 {}
 
 void Viewer::Impl::render(float frame_duration)
 {
-    // FIXME: pass actual active agents, not max
-    cfgUI(vizCtrl, maxNumAgents, numWorlds, &simTickRate);
+    // Only render UI if not hidden
+    if (!hideMenu) {
+        // FIXME: pass actual active agents, not max
+        cfgUI(vizCtrl, maxNumAgents, numWorlds, &simTickRate);
 
-    fpsCounterUI(frame_duration);
+        fpsCounterUI(frame_duration);
+    }
 
     ImGui::Render();
 

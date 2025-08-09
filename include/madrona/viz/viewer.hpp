@@ -21,6 +21,7 @@ public:
         float cameraMoveSpeed;
         math::Vector3 cameraPosition;
         math::Quat cameraRotation;
+        bool hideMenu = false;  // Hide ImGui menu for clean screenshots
     };
 
     enum class KeyboardKey : uint32_t {

@@ -4,10 +4,12 @@ LeafID BVH::reserveLeaf(Entity e, base::ObjectID obj_id)
 {
     int32_t leaf_idx = num_leaves_.fetch_add_relaxed(1);
     if (leaf_idx >= num_allocated_leaves_) {
+#ifndef MADRONA_GPU_MODE
         printf("BVH ALLOCATION ERROR: Trying to allocate leaf %d but only %d leaves allocated (max_entities was set too low)\n", 
                leaf_idx, num_allocated_leaves_);
         printf("Entity: %d, ObjectID: %d\n", (int)e.id, (int)obj_id.idx);
         fflush(stdout);
+#endif
     }
     assert(leaf_idx < num_allocated_leaves_);
 

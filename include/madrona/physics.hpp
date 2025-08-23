@@ -225,6 +225,24 @@ namespace PhysicsSystem {
         TaskGraphBuilder &builder,
         Span<const TaskGraphNodeID> deps);
 
+    // Expose internal physics steps for custom collision handling
+    TaskGraphNodeID setupBroadphasePreIntegrationTasks(
+        TaskGraphBuilder &builder,
+        Span<const TaskGraphNodeID> deps);
+    
+    TaskGraphNodeID setupBroadphasePostIntegrationTasks(
+        TaskGraphBuilder &builder,
+        Span<const TaskGraphNodeID> deps);
+    
+    TaskGraphNodeID setupNarrowphaseTasks(
+        TaskGraphBuilder &builder,
+        Span<const TaskGraphNodeID> deps);
+        
+    TaskGraphNodeID setupXPBDSolverTasks(
+        TaskGraphBuilder &builder,
+        TaskGraphNodeID broadphase,
+        CountT num_substeps);
+
 };
 
 }

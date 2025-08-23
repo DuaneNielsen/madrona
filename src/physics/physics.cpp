@@ -404,6 +404,36 @@ TaskGraphNodeID setupStandaloneBroadphaseCleanupTasks(
     return builder.addToGraph<ClearTmpNode<CandidateTemporary>>(deps);
 }
 
+// Expose internal methods for custom physics handling
+TaskGraphNodeID setupBroadphasePreIntegrationTasks(
+    TaskGraphBuilder &builder,
+    Span<const TaskGraphNodeID> deps)
+{
+    return broadphase::setupPreIntegrationTasks(builder, deps);
+}
+
+TaskGraphNodeID setupBroadphasePostIntegrationTasks(
+    TaskGraphBuilder &builder,
+    Span<const TaskGraphNodeID> deps)
+{
+    return broadphase::setupPostIntegrationTasks(builder, deps);
+}
+
+TaskGraphNodeID setupNarrowphaseTasks(
+    TaskGraphBuilder &builder,
+    Span<const TaskGraphNodeID> deps)
+{
+    return narrowphase::setupTasks(builder, deps);
+}
+
+TaskGraphNodeID setupXPBDSolverTasks(
+    TaskGraphBuilder &builder,
+    TaskGraphNodeID broadphase,
+    CountT num_substeps)
+{
+    return xpbd::setupXPBDSolverTasks(builder, broadphase, num_substeps);
+}
+
 
 }
 

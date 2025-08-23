@@ -6,43 +6,6 @@
 
 namespace madrona::phys::xpbd {
 
-struct XPBDContactState {
-    float lambdaN[4];
-};
-
-struct Contact : Archetype<
-    ContactConstraint,
-    XPBDContactState 
-> {};
-
-struct Joint : Archetype<JointConstraint> {};
-
-struct SolverState {
-    Query<JointConstraint> jointQuery;
-    Query<ContactConstraint, XPBDContactState> contactQuery;
-};
-
-struct SubstepPrevState {
-    math::Vector3 prevPosition;
-    math::Quat prevRotation;
-};
-
-struct PreSolvePositional {
-    math::Vector3 x;
-    math::Quat q;
-};
-
-struct PreSolveVelocity {
-    math::Vector3 v;
-    math::Vector3 omega;
-};
-
-struct XPBDRigidBodyState : Bundle<
-    SubstepPrevState,
-    PreSolvePositional,
-    PreSolveVelocity
-> {};
-
 namespace XPBDCols {
     constexpr inline CountT SubstepPrevState = RGDCols::SolverBase;
     constexpr inline CountT PreSolvePositional = RGDCols::SolverBase + 1;
@@ -97,7 +60,7 @@ static inline Vector3 multDiag(Vector3 diag, Vector3 v)
     };
 }
 
-inline void substepRigidBodies(Context &ctx,
+void substepRigidBodies(Context &ctx,
                                Position &pos,
                                Rotation &rot,
                                const Velocity &vel,
@@ -717,7 +680,7 @@ inline void handleJointConstraint(Context &ctx,
     *q2_ptr = q2;
 }
 
-inline void solvePositions(Context &ctx, SolverState &solver_state)
+void solvePositions(Context &ctx, SolverState &solver_state)
 {
     ObjectManager &obj_mgr = *ctx.singleton<ObjectData>().mgr;
 
@@ -735,7 +698,7 @@ inline void solvePositions(Context &ctx, SolverState &solver_state)
     });
 }
 
-inline void setVelocities(Context &ctx,
+void setVelocities(Context &ctx,
                           const Position &pos,
                           const Rotation &rot,
                           const SubstepPrevState &prev_state,
@@ -1038,7 +1001,7 @@ static inline void solveVelocitiesForContact(Context &ctx,
     *v2_out = Velocity { v2, omega2 };
 }
 
-inline void solveVelocities(Context &ctx, SolverState &solver)
+void solveVelocities(Context &ctx, SolverState &solver)
 {
     ObjectManager &obj_mgr = *ctx.singleton<ObjectData>().mgr;
     PhysicsSystemState &physics_sys = ctx.singleton<PhysicsSystemState>();

@@ -279,6 +279,15 @@ static void setCudaHeapSize()
             heap_size = strtoul(user_heap_size,nullptr,10);
         }
 
+        // Check current heap size before setting to avoid errors
+        // when multiple managers are created on the same device
+        size_t current_heap_size;
+        cudaError_t err = cudaDeviceGetLimit(&current_heap_size, cudaLimitMallocHeapSize);
+        if (err == cudaSuccess && current_heap_size >= heap_size) {
+            // Heap size is already set to desired value or larger, skip setting
+            return;
+        }
+
         REQ_CUDA(cudaDeviceSetLimit(cudaLimitMallocHeapSize,
                                     heap_size));
     }

@@ -278,7 +278,7 @@ inline void viewTransformUpdate(Context &ctx,
                                 const Rotation &rot,
                                 const RenderCamera &cam)
 {
-    Vector3 camera_pos = pos + cam.cameraOffset;
+    Vector3 camera_pos = pos + rot.rotateVec(cam.cameraOffset);
 
 #if defined(MADRONA_GPU_MODE)
     (void)e;

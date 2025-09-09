@@ -1,0 +1,2 @@
+/home/duane/madrona_escape_room/external/madrona/external/madrona-toolchain/bundled-toolchain/toolchain/bin/llvm-ar qc libmadrona_mem.a CMakeFiles/madrona_mem.dir/memory.cpp.o CMakeFiles/madrona_mem.dir/stack_alloc.cpp.o
+/home/duane/madrona_escape_room/external/madrona/external/madrona-toolchain/bundled-toolchain/toolchain/bin/llvm-ranlib libmadrona_mem.a

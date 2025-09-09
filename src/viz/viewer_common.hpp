@@ -19,6 +19,12 @@ struct ViewerCam {
     float fov = 60.f;
     float orthoHeight = 5.f;
     math::Vector2 mousePrev {0.f, 0.f};
+    
+    // Camera tracking mode
+    bool isTracking = false;
+    uint32_t trackedWorld = 0;
+    uint32_t trackedAgent = 0;
+    float trackingOffset = 5.0f;
 };
     
 // Required for rendering the viewer image

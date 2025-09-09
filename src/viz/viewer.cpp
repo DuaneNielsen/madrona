@@ -13,6 +13,9 @@
 #include <thread>
 #include <algorithm>
 
+// Include manager header for camera tracking
+#include "../../../../src/mgr.hpp"
+
 using namespace std;
 
 namespace madrona::viz {
@@ -42,6 +45,7 @@ struct Viewer::Impl {
     float cameraMoveSpeed;
     bool shouldExit;
     bool hideMenu;
+    void *manager; // Manager pointer for camera tracking
 
     inline Impl(const render::RenderManager &render_mgr,
                 const Window *window,
@@ -68,8 +72,15 @@ struct Viewer::Impl {
 
 static void handleCamera(GLFWwindow *window,
                          ViewerCam &cam,
-                         float cam_move_speed)
+                         float cam_move_speed,
+                         void *mgr_ptr = nullptr)
 {
+    static int call_counter = 0;
+    if (call_counter++ % 300 == 0) { // Print every 5 seconds at 60fps
+        printf("handleCamera called (frame %d), tracking=%s, mgr_ptr=%p\n", 
+               call_counter, cam.isTracking ? "true" : "false", mgr_ptr);
+    }
+    
     auto keyPressed = [&](uint32_t key) {
         return glfwGetKey(window, key) == GLFW_PRESS;
     };
@@ -143,8 +154,11 @@ static void handleCamera(GLFWwindow *window,
         cam.mousePrev = cursorPosition();
     }
 
+    // Apply camera movement normally - tracking will override position
     cam.position += translate * cam_move_speed *
         InternalConfig::secondsPerFrame;
+    
+    // Camera tracking removed - now handled by application layer
 }
 
 static float throttleFPS(chrono::time_point<chrono::steady_clock> start) {
@@ -270,6 +284,31 @@ static void flyCamUI(ViewerCam &cam)
 
     ImGui::TextUnformatted("Projection");
 #endif
+
+    // Camera Tracking Controls
+    ImGui::Spacing();
+    ImGui::TextUnformatted("Agent Tracking");
+    ImGui::Separator();
+    
+    ImGui::Checkbox("Enable Tracking", &cam.isTracking);
+    
+    if (cam.isTracking) {
+        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000").x * 2);
+        ImGui::DragInt("World", (int*)&cam.trackedWorld, 1.0f, 0, 99, "%d");
+        
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000").x * 2);
+        ImGui::DragInt("Agent", (int*)&cam.trackedAgent, 1.0f, 0, 9, "%d");
+        
+        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000.0").x * 2);
+        ImGui::DragFloat("X Offset", &cam.trackingOffset, 0.5f, 0.0f, 20.0f, "%.1f");
+        
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "WASD controls agent");
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Camera follows automatically");
+    }
+    
+    ImGui::Spacing();
 
     float digit_width = ImGui::CalcTextSize("0").x;
     ImGui::SetNextItemWidth(digit_width * 6);
@@ -547,7 +586,8 @@ Viewer::Impl::Impl(
       simTickRate(cfg.simTickRate),
       cameraMoveSpeed(cfg.cameraMoveSpeed),
       shouldExit(false),
-      hideMenu(cfg.hideMenu)
+      hideMenu(cfg.hideMenu),
+      manager(cfg.manager)
 {}
 
 void Viewer::Impl::render(float frame_duration)
@@ -642,9 +682,15 @@ void Viewer::Impl::loop(
             press_state[i] = !prev_key_state[i] && key_state[i];
         }
 
-        if (vizCtrl.controlIdx == 0) {
-            handleCamera(window, vizCtrl.flyCam, cameraMoveSpeed);
+        static int loop_counter = 0;
+        if (loop_counter++ % 300 == 0) {
+            printf("Main loop: controlIdx=%d\n", vizCtrl.controlIdx);
         }
+        
+        // Camera handling moved to application layer
+        // if (vizCtrl.controlIdx == 0) {
+        //     handleCamera(window, vizCtrl.flyCam, cameraMoveSpeed, manager);
+        // }
 
         auto cur_frame_start_time = chrono::steady_clock::now();
 
@@ -734,6 +780,52 @@ CountT Viewer::getCurrentViewID() const
 CountT Viewer::getCurrentControlID() const
 {
     return (CountT)impl_->vizCtrl.viewIdx - 1;
+}
+
+void Viewer::toggleCameraTracking()
+{
+    impl_->vizCtrl.flyCam.isTracking = !impl_->vizCtrl.flyCam.isTracking;
+    printf("Camera tracking %s (F key pressed)\n", impl_->vizCtrl.flyCam.isTracking ? "enabled" : "disabled");
+}
+
+void Viewer::setCameraPosition(const math::Vector3& pos)
+{
+    impl_->vizCtrl.flyCam.position = pos;
+}
+
+void Viewer::setCameraOrientation(const math::Quat& rot)
+{
+    // Convert quaternion to direction vectors
+    impl_->vizCtrl.flyCam.fwd = rot.rotateVec(math::fwd);
+    impl_->vizCtrl.flyCam.up = rot.rotateVec(math::up);
+    impl_->vizCtrl.flyCam.right = rot.rotateVec(math::right);
+}
+
+void Viewer::setCameraLookAt(const math::Vector3& pos, const math::Vector3& target)
+{
+    impl_->vizCtrl.flyCam.position = pos;
+    impl_->vizCtrl.flyCam.fwd = (target - pos).normalize();
+    impl_->vizCtrl.flyCam.right = cross(impl_->vizCtrl.flyCam.fwd, math::up).normalize();
+    impl_->vizCtrl.flyCam.up = cross(impl_->vizCtrl.flyCam.right, impl_->vizCtrl.flyCam.fwd).normalize();
+}
+
+void Viewer::setCameraVectors(const math::Vector3& pos, const math::Vector3& fwd, 
+                              const math::Vector3& up, const math::Vector3& right)
+{
+    impl_->vizCtrl.flyCam.position = pos;
+    impl_->vizCtrl.flyCam.fwd = fwd;
+    impl_->vizCtrl.flyCam.up = up;
+    impl_->vizCtrl.flyCam.right = right;
+}
+
+ViewerCam& Viewer::getCamera()
+{
+    return impl_->vizCtrl.flyCam;
+}
+
+const ViewerCam& Viewer::getCamera() const
+{
+    return impl_->vizCtrl.flyCam;
 }
 
 }

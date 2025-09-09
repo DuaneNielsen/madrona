@@ -9,6 +9,9 @@
 
 namespace madrona::viz {
 
+// Forward declaration
+struct ViewerCam;
+
 // The viewer app simply provides UI overlay over the rendering output
 // of the render context and presents the whole rendering output
 // to the screen.
@@ -22,6 +25,7 @@ public:
         math::Vector3 cameraPosition;
         math::Quat cameraRotation;
         bool hideMenu = false;  // Hide ImGui menu for clean screenshots
+        void *manager = nullptr; // Manager pointer for camera tracking
     };
 
     enum class KeyboardKey : uint32_t {
@@ -68,6 +72,18 @@ public:
     CountT getCurrentWorldID() const;
     CountT getCurrentViewID() const;
     CountT getCurrentControlID() const;
+    
+    // Camera tracking controls
+    void toggleCameraTracking();
+    
+    // Direct camera control methods
+    void setCameraPosition(const math::Vector3& pos);
+    void setCameraOrientation(const math::Quat& rot);
+    void setCameraLookAt(const math::Vector3& pos, const math::Vector3& target);
+    void setCameraVectors(const math::Vector3& pos, const math::Vector3& fwd, 
+                         const math::Vector3& up, const math::Vector3& right);
+    ViewerCam& getCamera();
+    const ViewerCam& getCamera() const;
 
 private:
     void loop(

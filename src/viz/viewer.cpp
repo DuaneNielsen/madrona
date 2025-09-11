@@ -285,29 +285,7 @@ static void flyCamUI(ViewerCam &cam)
     ImGui::TextUnformatted("Projection");
 #endif
 
-    // Camera Tracking Controls
-    ImGui::Spacing();
-    ImGui::TextUnformatted("Agent Tracking");
-    ImGui::Separator();
-    
-    ImGui::Checkbox("Enable Tracking", &cam.isTracking);
-    
-    if (cam.isTracking) {
-        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000").x * 2);
-        ImGui::DragInt("World", (int*)&cam.trackedWorld, 1.0f, 0, 99, "%d");
-        
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000").x * 2);
-        ImGui::DragInt("Agent", (int*)&cam.trackedAgent, 1.0f, 0, 9, "%d");
-        
-        ImGui::SetNextItemWidth(ImGui::CalcTextSize("000.0").x * 2);
-        ImGui::DragFloat("X Offset", &cam.trackingOffset, 0.5f, 0.0f, 20.0f, "%.1f");
-        
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "WASD controls agent");
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Camera follows automatically");
-    }
-    
+    // Camera tracking controls removed - now handled by application
     ImGui::Spacing();
 
     float digit_width = ImGui::CalcTextSize("0").x;
@@ -682,10 +660,6 @@ void Viewer::Impl::loop(
             press_state[i] = !prev_key_state[i] && key_state[i];
         }
 
-        static int loop_counter = 0;
-        if (loop_counter++ % 300 == 0) {
-            printf("Main loop: controlIdx=%d\n", vizCtrl.controlIdx);
-        }
         
         // Camera handling moved to application layer
         // if (vizCtrl.controlIdx == 0) {

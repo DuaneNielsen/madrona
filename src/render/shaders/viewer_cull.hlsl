@@ -81,10 +81,22 @@ void instanceCull(uint3 tid           : SV_DispatchThreadID,
                   uint3 gid           : SV_GroupID)
 {
     if (tid_local.x == 0) {
-        sm.numInstances = getNumInstancesForWorld(pushConst.worldIDX);
+        // Handle multi-world rendering by calculating total instances across world range
+        if (pushConst.numWorldsToRender > 1) {
+            // Multi-world mode: sum instances from startWorldIdx to startWorldIdx + numWorldsToRender - 1
+            sm.numInstances = 0;
+            for (uint world = pushConst.startWorldIdx; world < pushConst.startWorldIdx + pushConst.numWorldsToRender; ++world) {
+                sm.numInstances += getNumInstancesForWorld(world);
+            }
+            sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.startWorldIdx);
+        } else {
+            // Single world mode (existing behavior)
+            sm.numInstances = getNumInstancesForWorld(pushConst.worldIDX);
+            sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.worldIDX);
+        }
+        
         sm.numInstancesPerThread = (sm.numInstances + pushConst.numThreads-1) /
                                    pushConst.numThreads;
-        sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.worldIDX);
         // printf("%d\n", sm.numInstances);
     }
 

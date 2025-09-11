@@ -2031,7 +2031,7 @@ static void issueCulling(Device &dev,
                          const Frame &frame,
                          const Pipeline<1> &instance_cull,
                          VkDescriptorSet asset_set_cull,
-                         uint32_t world_idx,
+                         const ViewerControl &viz_ctrl,
                          uint32_t num_instances,
                          uint32_t num_views,
                          uint32_t num_worlds)
@@ -2052,12 +2052,24 @@ static void issueCulling(Device &dev,
 
     uint32_t num_warps = 4;
 
+    // Determine multi-world parameters based on viz_ctrl.multiWorldGrid
+    uint32_t start_world_idx, num_worlds_to_render;
+    if (viz_ctrl.multiWorldGrid) {
+        start_world_idx = 0;
+        num_worlds_to_render = num_worlds;
+    } else {
+        start_world_idx = viz_ctrl.worldIdx;
+        num_worlds_to_render = 1;
+    }
+
     CullPushConst cull_push_const {
-        world_idx,
+        viz_ctrl.worldIdx,  // Keep existing worldIDX for compatibility
         num_views,
         num_instances,
         num_worlds,
-        num_warps * 32
+        num_warps * 32,
+        start_world_idx,
+        num_worlds_to_render
     };
 
     dev.dt.cmdPushConstants(draw_cmd, instance_cull.layout,
@@ -2909,7 +2921,7 @@ bool ViewerRendererState::renderFlycamFrame(const ViewerControl &viz_ctrl)
 
         issueCulling(dev, draw_cmd, frame, rctx.instanceCull,
                      rctx.asset_set_cull_,
-                     world_idx, cur_num_instances, cur_num_views,
+                     viz_ctrl, cur_num_instances, cur_num_views,
                      rctx.num_worlds_);
     }
 
@@ -3054,7 +3066,14 @@ bool ViewerRendererState::renderFlycamFrame(const ViewerControl &viz_ctrl)
         80.0f, // y max
         -80.0f, // y min
         60.0f, // z max
-        -60.0f  // z min
+        -60.0f,  // z min
+        
+        // Add grid parameters from ViewerControl
+        viz_ctrl.multiWorldGrid ? 1u : 0u,
+        viz_ctrl.gridCols,
+        viz_ctrl.worldSpacing,
+        viz_ctrl.worldScaleX,
+        viz_ctrl.worldScaleY,
     };
 
     dev.dt.cmdPushConstants(draw_cmd, rctx.objectDraw.layout,

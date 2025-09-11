@@ -50,6 +50,8 @@ struct CullPushConst {
     uint32_t numInstances;
     uint32_t numWorlds;
     uint32_t numThreads;
+    uint32_t startWorldIdx;
+    uint32_t numWorldsToRender;
 };
 
 struct DeferredLightingPushConst {
@@ -109,6 +111,13 @@ struct DrawPushConst {
     float yMin;
     float zMax;
     float zMin;
+    
+    // Grid layout parameters
+    uint32_t multiWorldGrid;
+    uint32_t gridCols;
+    float worldSpacing;
+    float worldScaleX;
+    float worldScaleY;
 };
 
 struct ShadowGenPushConst {

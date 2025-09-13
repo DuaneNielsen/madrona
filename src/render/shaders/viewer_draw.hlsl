@@ -184,32 +184,30 @@ PerspectiveCameraData getCameraData()
     return camera_data;
 }
 
+// Stage 1: Helper function to calculate grid layout position
+float3 calculateGridPosition(uint worldId, uint gridCols, float worldWidth, float worldHeight, float spacing) {
+    uint row = worldId / gridCols;
+    uint col = worldId % gridCols;
+    
+    float x_spacing = worldWidth + spacing;
+    float y_spacing = worldHeight + spacing;
+    
+    return float3(col * x_spacing, row * y_spacing, 0);
+}
+
 float3 getWorldGridOffset(uint worldId) {
     if (push_const.multiWorldGrid == 0) {
         return float3(0, 0, 0);
     }
     
-    // Parameterized grid layout calculations
-    const float TILE_SIZE = 2.5f;              // Base tile size in units
-    const uint X_TILES = 16;                   // Level width in tiles
-    const uint Y_TILES = 16;                   // Level height in tiles
-    const float WORLD_SCALE = 1.0f;            // World scale factor
-    const float GRID_BUFFER = 10.0f;           // Buffer space between worlds
-    const uint GRID_COLS = 4;                  // 4x4 grid layout
-    
-    // Calculate world dimensions
-    float world_width = X_TILES * TILE_SIZE * WORLD_SCALE;     // 16 * 2.5 * 1.0 = 40.0
-    float world_height = Y_TILES * TILE_SIZE * WORLD_SCALE;    // 16 * 2.5 * 1.0 = 40.0
-    
-    // Calculate spacing (world size + buffer)
-    float x_spacing = world_width + GRID_BUFFER;               // 40.0 + 10.0 = 50.0
-    float y_spacing = world_height + GRID_BUFFER;              // 40.0 + 10.0 = 50.0
-    
-    // Calculate grid position
-    uint row = worldId / GRID_COLS;
-    uint col = worldId % GRID_COLS;
-    
-    return float3(col * x_spacing, row * y_spacing, 0);
+    // Stage 2: Use push constant values from CPU
+    return calculateGridPosition(
+        worldId, 
+        push_const.gridCols,
+        push_const.worldScaleX,
+        push_const.worldScaleY,
+        push_const.worldSpacing
+    );
 }
 
 [shader("vertex")]

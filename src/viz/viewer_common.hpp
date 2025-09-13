@@ -46,6 +46,13 @@ struct ViewerControl {
     float batchRenderOffsetX;
     float batchRenderOffsetY;
     bool batchRenderShowDepth;
+    
+    // Multi-world grid layout parameters
+    bool multiWorldGrid;
+    uint32_t gridCols;
+    float worldSpacing;
+    float worldScaleX;
+    float worldScaleY;
 };
 
 }

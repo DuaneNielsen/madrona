@@ -579,6 +579,12 @@ Viewer::Impl::Impl(
           .batchRenderOffsetX = 0,
           .batchRenderOffsetY = 0,
           .batchRenderShowDepth = false,
+          // Initialize multi-world grid parameters with defaults
+          .multiWorldGrid = false,
+          .gridCols = 4,
+          .worldSpacing = 10.0f,
+          .worldScaleX = 40.0f,
+          .worldScaleY = 40.0f,
       },
       numWorlds(cfg.numWorlds),
       maxNumAgents(
@@ -826,6 +832,22 @@ ViewerCam& Viewer::getCamera()
 const ViewerCam& Viewer::getCamera() const
 {
     return impl_->vizCtrl.flyCam;
+}
+
+void Viewer::setMultiWorldGrid(bool enabled, float spacing, uint32_t gridCols, 
+                              float worldScaleX, float worldScaleY)
+{
+    impl_->vizCtrl.multiWorldGrid = enabled;
+    impl_->vizCtrl.worldSpacing = spacing;
+    impl_->vizCtrl.gridCols = gridCols;
+    impl_->vizCtrl.worldScaleX = worldScaleX;
+    impl_->vizCtrl.worldScaleY = worldScaleY;
+}
+
+void Viewer::setMultiWorldGrid(bool enabled)
+{
+    impl_->vizCtrl.multiWorldGrid = enabled;
+    // Keep existing values for other parameters if they were set before
 }
 
 }

@@ -45,13 +45,11 @@ struct BlurPushConst {
 };
 
 struct CullPushConst {
-    uint32_t worldIDX;
-    uint32_t numViews;
-    uint32_t numInstances;
-    uint32_t numWorlds;
-    uint32_t numThreads;
-    uint32_t startWorldIdx;
-    uint32_t numWorldsToRender;
+    uint32_t startRenderWorldIdx;  // First world to render (inclusive)
+    uint32_t endRenderWorldIdx;    // Last world to render (inclusive)
+    uint32_t numThreads;           // Thread count for work distribution
+    uint32_t totalInstances;       // Total instances across ALL worlds
+    uint32_t totalWorlds;          // Total number of worlds in simulation
 };
 
 struct DeferredLightingPushConst {

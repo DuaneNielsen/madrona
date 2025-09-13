@@ -34,8 +34,8 @@ StructuredBuffer<MeshData> meshDataBuffer;
 
 uint getNumInstancesForWorld(uint world_idx)
 {
-    if (world_idx == pushConst.numWorlds - 1) {
-        return pushConst.numInstances - instanceOffsets[world_idx];
+    if (world_idx == pushConst.totalWorlds - 1) {
+        return pushConst.totalInstances - instanceOffsets[world_idx];
     } else {
         return instanceOffsets[world_idx+1] - instanceOffsets[world_idx];
     }
@@ -81,20 +81,13 @@ void instanceCull(uint3 tid           : SV_DispatchThreadID,
                   uint3 gid           : SV_GroupID)
 {
     if (tid_local.x == 0) {
-        // Handle multi-world rendering by calculating total instances across world range
-        if (pushConst.numWorldsToRender > 1) {
-            // Multi-world mode: sum instances from startWorldIdx to startWorldIdx + numWorldsToRender - 1
-            sm.numInstances = 0;
-            for (uint world = pushConst.startWorldIdx; world < pushConst.startWorldIdx + pushConst.numWorldsToRender; ++world) {
-                sm.numInstances += getNumInstancesForWorld(world);
-            }
-            sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.startWorldIdx);
-        } else {
-            // Single world mode (existing behavior)
-            sm.numInstances = getNumInstancesForWorld(pushConst.worldIDX);
-            sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.worldIDX);
+        sm.numInstances = 0;
+        // Always use the same logic - iterate from start to end (inclusive)
+        for (uint world = pushConst.startRenderWorldIdx; 
+             world <= pushConst.endRenderWorldIdx; ++world) {
+            sm.numInstances += getNumInstancesForWorld(world);
         }
-        
+        sm.instancesOffset = getInstanceOffsetsForWorld(pushConst.startRenderWorldIdx);
         sm.numInstancesPerThread = (sm.numInstances + pushConst.numThreads-1) /
                                    pushConst.numThreads;
         // printf("%d\n", sm.numInstances);

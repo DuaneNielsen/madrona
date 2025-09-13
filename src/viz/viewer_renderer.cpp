@@ -2052,24 +2052,24 @@ static void issueCulling(Device &dev,
 
     uint32_t num_warps = 4;
 
-    // Determine multi-world parameters based on viz_ctrl.multiWorldGrid
-    uint32_t start_world_idx, num_worlds_to_render;
+    // Determine world range based on multi-world grid setting
+    uint32_t start_render_world_idx, end_render_world_idx;
     if (viz_ctrl.multiWorldGrid) {
-        start_world_idx = 0;
-        num_worlds_to_render = num_worlds;
+        // Grid mode: render all worlds
+        start_render_world_idx = 0;
+        end_render_world_idx = num_worlds - 1;
     } else {
-        start_world_idx = viz_ctrl.worldIdx;
-        num_worlds_to_render = 1;
+        // Single world mode: render only selected world
+        start_render_world_idx = viz_ctrl.worldIdx;
+        end_render_world_idx = viz_ctrl.worldIdx;
     }
 
     CullPushConst cull_push_const {
-        viz_ctrl.worldIdx,  // Keep existing worldIDX for compatibility
-        num_views,
-        num_instances,
-        num_worlds,
-        num_warps * 32,
-        start_world_idx,
-        num_worlds_to_render
+        start_render_world_idx,
+        end_render_world_idx,
+        num_warps * 32,         // numThreads
+        num_instances,          // totalInstances
+        num_worlds              // totalWorlds
     };
 
     dev.dt.cmdPushConstants(draw_cmd, instance_cull.layout,
@@ -3068,7 +3068,7 @@ bool ViewerRendererState::renderFlycamFrame(const ViewerControl &viz_ctrl)
         60.0f, // z max
         -60.0f,  // z min
         
-        // Add grid parameters from ViewerControl
+        // Stage 2: Use parameters from ViewerControl
         viz_ctrl.multiWorldGrid ? 1u : 0u,
         viz_ctrl.gridCols,
         viz_ctrl.worldSpacing,

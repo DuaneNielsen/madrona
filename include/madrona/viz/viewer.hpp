@@ -84,6 +84,11 @@ public:
                          const math::Vector3& up, const math::Vector3& right);
     ViewerCam& getCamera();
     const ViewerCam& getCamera() const;
+    
+    // Multi-world grid layout control
+    void setMultiWorldGrid(bool enabled, float spacing = 10.0f, uint32_t gridCols = 4, 
+                          float worldScaleX = 40.0f, float worldScaleY = 40.0f);
+    void setMultiWorldGrid(bool enabled);
 
 private:
     void loop(

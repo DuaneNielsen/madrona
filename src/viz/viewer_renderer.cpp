@@ -12,6 +12,9 @@
 
 namespace madrona::viz {
 
+// Maximum worlds to display in grid mode
+constexpr uint32_t maxDisplayWorlds = 36;
+
 struct ImGUIVkLookupData {
     PFN_vkGetDeviceProcAddr getDevAddr;
     VkDevice dev;
@@ -2052,12 +2055,15 @@ static void issueCulling(Device &dev,
 
     uint32_t num_warps = 4;
 
+    // Apply display limit for multi-world grid
+    uint32_t num_worlds_to_render = std::min(num_worlds, maxDisplayWorlds);
+
     // Determine world range based on multi-world grid setting
     uint32_t start_render_world_idx, end_render_world_idx;
     if (viz_ctrl.multiWorldGrid) {
-        // Grid mode: render all worlds
+        // Grid mode: render worlds up to display limit
         start_render_world_idx = 0;
-        end_render_world_idx = num_worlds - 1;
+        end_render_world_idx = num_worlds_to_render - 1;
     } else {
         // Single world mode: render only selected world
         start_render_world_idx = viz_ctrl.worldIdx;
@@ -3070,7 +3076,7 @@ bool ViewerRendererState::renderFlycamFrame(const ViewerControl &viz_ctrl)
         
         // Stage 2: Use parameters from ViewerControl
         viz_ctrl.multiWorldGrid ? 1u : 0u,
-        viz_ctrl.gridCols,
+        static_cast<uint32_t>(std::ceil(std::sqrt(std::min(rctx.num_worlds_, maxDisplayWorlds)))),
         viz_ctrl.worldSpacing,
         viz_ctrl.worldScaleX,
         viz_ctrl.worldScaleY,

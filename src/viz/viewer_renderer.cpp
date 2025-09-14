@@ -1933,17 +1933,9 @@ static void packLighting(const Device &dev,
 {
     DirectionalLight *staging = (DirectionalLight *)light_staging_buffer.ptr;
     
-    if (multiWorldGrid && lights.size() > 0) {
-        // In multi-world grid mode, use only the first light (single light source)
-        // Fill all light slots with the same light to maintain shader compatibility
-        for (int i = 0; i < InternalConfig::maxLights; ++i) {
-            staging[i] = lights[0];
-        }
-    } else {
-        // Single world mode: use all lights per world as before
-        memcpy(staging, lights.data(),
-               sizeof(DirectionalLight) * InternalConfig::maxLights);
-    }
+    // Always use the original lights data - no special multiworld lighting logic
+    memcpy(staging, lights.data(),
+           sizeof(DirectionalLight) * InternalConfig::maxLights);
     light_staging_buffer.flush(dev);
 }
 

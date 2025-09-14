@@ -688,10 +688,6 @@ void Viewer::Impl::loop(
             press_state[i] = !prev_key_state[i] && key_state[i];
         }
 
-        static int loop_counter = 0;
-        if (loop_counter++ % 300 == 0) {
-            printf("Main loop: controlIdx=%d\n", vizCtrl.controlIdx);
-        }
         
         // Camera handling moved to application layer
         // if (vizCtrl.controlIdx == 0) {

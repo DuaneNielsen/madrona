@@ -75,11 +75,6 @@ static void handleCamera(GLFWwindow *window,
                          float cam_move_speed,
                          void *mgr_ptr = nullptr)
 {
-    static int call_counter = 0;
-    if (call_counter++ % 300 == 0) { // Print every 5 seconds at 60fps
-        printf("handleCamera called (frame %d), tracking=%s, mgr_ptr=%p\n", 
-               call_counter, cam.isTracking ? "true" : "false", mgr_ptr);
-    }
     
     auto keyPressed = [&](uint32_t key) {
         return glfwGetKey(window, key) == GLFW_PRESS;
@@ -759,7 +754,6 @@ CountT Viewer::getCurrentControlID() const
 void Viewer::toggleCameraTracking()
 {
     impl_->vizCtrl.flyCam.isTracking = !impl_->vizCtrl.flyCam.isTracking;
-    printf("Camera tracking %s (F key pressed)\n", impl_->vizCtrl.flyCam.isTracking ? "enabled" : "disabled");
 }
 
 void Viewer::setCameraPosition(const math::Vector3& pos)

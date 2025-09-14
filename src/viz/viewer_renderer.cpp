@@ -2069,9 +2069,13 @@ static void issueCulling(Device &dev,
     // Apply display limit for multi-world grid
     uint32_t num_worlds_to_render = std::min(num_worlds, maxDisplayWorlds);
 
-    // Determine world range based on multi-world grid setting
+    // Determine world range based on mode
     uint32_t start_render_world_idx, end_render_world_idx;
-    if (viz_ctrl.multiWorldGrid) {
+    if (viz_ctrl.exploreMode) {
+        // Explore mode: render all worlds overlapped for agent comparison
+        start_render_world_idx = 0;
+        end_render_world_idx = num_worlds_to_render - 1;
+    } else if (viz_ctrl.multiWorldGrid) {
         // Grid mode: render worlds up to display limit
         start_render_world_idx = 0;
         end_render_world_idx = num_worlds_to_render - 1;
@@ -2086,7 +2090,8 @@ static void issueCulling(Device &dev,
         end_render_world_idx,
         num_warps * 32,         // numThreads
         num_instances,          // totalInstances
-        num_worlds              // totalWorlds
+        num_worlds,             // totalWorlds
+        viz_ctrl.exploreMode ? 1u : 0u  // exploreMode
     };
 
     dev.dt.cmdPushConstants(draw_cmd, instance_cull.layout,

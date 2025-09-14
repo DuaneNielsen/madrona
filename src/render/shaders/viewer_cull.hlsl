@@ -107,6 +107,14 @@ void instanceCull(uint3 tid           : SV_DispatchThreadID,
         EngineInstanceData instance_data = unpackEngineInstanceData(
             engineInstanceBuffer[current_instance_idx]);
 
+        // Apply object filtering only in explore mode
+        if (pushConst.exploreMode > 0) {
+            // In explore mode: render only agents (3) and floor/plane (4) 
+            if (instance_data.objectID != 3 && instance_data.objectID != 4) {
+                continue;
+            }
+        }
+
         ObjectData obj = objectDataBuffer[instance_data.objectID];
 
         uint draw_offset;

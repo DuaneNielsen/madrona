@@ -850,4 +850,9 @@ void Viewer::setMultiWorldGrid(bool enabled)
     // Keep existing values for other parameters if they were set before
 }
 
+void Viewer::setExploreMode(bool enabled)
+{
+    impl_->vizCtrl.exploreMode = enabled;
+}
+
 }

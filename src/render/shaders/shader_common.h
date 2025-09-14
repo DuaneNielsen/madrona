@@ -50,6 +50,7 @@ struct CullPushConst {
     uint32_t numThreads;           // Thread count for work distribution
     uint32_t totalInstances;       // Total instances across ALL worlds
     uint32_t totalWorlds;          // Total number of worlds in simulation
+    uint32_t exploreMode;          // 1 if explore mode is active, 0 otherwise
 };
 
 struct DeferredLightingPushConst {

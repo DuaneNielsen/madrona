@@ -89,6 +89,9 @@ public:
     void setMultiWorldGrid(bool enabled, float spacing = 10.0f, uint32_t gridCols = 4, 
                           float worldScaleX = 40.0f, float worldScaleY = 40.0f);
     void setMultiWorldGrid(bool enabled);
+    
+    // Explore mode control - overlay all agents in same coordinate space
+    void setExploreMode(bool enabled);
 
 private:
     void loop(

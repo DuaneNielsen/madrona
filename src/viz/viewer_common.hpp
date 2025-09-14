@@ -53,6 +53,9 @@ struct ViewerControl {
     float worldSpacing;
     float worldScaleX;
     float worldScaleY;
+    
+    // Explore mode - overlay all agents in same coordinate space
+    bool exploreMode;
 };
 
 }

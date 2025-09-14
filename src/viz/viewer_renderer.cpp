@@ -1928,11 +1928,22 @@ static void packSky( const Device &dev,
 
 static void packLighting(const Device &dev,
                          HostBuffer &light_staging_buffer,
-                         const HeapArray<DirectionalLight> &lights)
+                         const HeapArray<DirectionalLight> &lights,
+                         bool multiWorldGrid)
 {
     DirectionalLight *staging = (DirectionalLight *)light_staging_buffer.ptr;
-    memcpy(staging, lights.data(),
-           sizeof(DirectionalLight) * InternalConfig::maxLights);
+    
+    if (multiWorldGrid && lights.size() > 0) {
+        // In multi-world grid mode, use only the first light (single light source)
+        // Fill all light slots with the same light to maintain shader compatibility
+        for (int i = 0; i < InternalConfig::maxLights; ++i) {
+            staging[i] = lights[0];
+        }
+    } else {
+        // Single world mode: use all lights per world as before
+        memcpy(staging, lights.data(),
+               sizeof(DirectionalLight) * InternalConfig::maxLights);
+    }
     light_staging_buffer.flush(dev);
 }
 
@@ -2671,7 +2682,7 @@ bool ViewerRendererState::renderGridFrame(const viz::ViewerControl &viz_ctrl)
     }
 
     { // Pack the lighting data and copy it to the render input
-        packLighting(dev, frame.lightStaging, rctx.lights_);
+        packLighting(dev, frame.lightStaging, rctx.lights_, viz_ctrl.multiWorldGrid);
         VkBufferCopy light_copy {
             .srcOffset = 0,
             .dstOffset = frame.lightOffset,
@@ -2838,7 +2849,7 @@ bool ViewerRendererState::renderFlycamFrame(const ViewerControl &viz_ctrl)
     }
 
     { // Pack the lighting data and copy it to the render input
-        packLighting(dev, frame.lightStaging, rctx.lights_);
+        packLighting(dev, frame.lightStaging, rctx.lights_, viz_ctrl.multiWorldGrid);
         VkBufferCopy light_copy {
             .srcOffset = 0,
             .dstOffset = frame.lightOffset,
